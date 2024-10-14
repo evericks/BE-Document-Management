@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Application\Application.csproj" />
+      <ProjectReference Include="..\Common\Common.csproj" />
+      <ProjectReference Include="..\Data\Data.csproj" />
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+      <PackageReference Include="Hangfire" Version="1.8.14" />
+      <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.7" />
+      <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+      <PackageReference Include="StackExchange.Redis" Version="2.8.0" />
+      <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.8.1" />
+      <PackageReference Include="Swashbuckle.AspNetCore.Newtonsoft" Version="6.8.1" />
+    </ItemGroup>
+
+</Project>
