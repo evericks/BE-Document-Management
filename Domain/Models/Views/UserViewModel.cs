@@ -15,12 +15,14 @@ public class UserViewModel
     public string? Address { get; set; }
 
     public string Status { get; set; } = null!;
+    
     public DateTime? Birthdate { get; set; }
+    
     public string? Gender { get; set; }
 
-    public RoleViewModel Role { get; set; }
+    public Guid RoleId { get; set; }
     
-    public DepartmentViewModel Department { get; set; }
+    public Guid DepartmentId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

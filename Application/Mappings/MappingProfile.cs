@@ -14,6 +14,10 @@ public class MappingProfile: Profile
     {
         CreateMap<User, UserInformationModel>();
         CreateMap<User, UserViewModel>();
+        CreateMap<UserCreateModel, User>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => UserStatuses.Active))
+            .ForMember(dest => dest.Password, opt => opt.MapFrom(_ => DefaultConst.UserPassword));
         CreateMap<UserUpdateModel, User>();
         
         CreateMap<Role, RoleViewModel>();
