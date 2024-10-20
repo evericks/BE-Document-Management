@@ -37,6 +37,27 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _user ??= new UserRepository(_context); }
     }
+    
+    private IDocumentRepository? _document;
+
+    public IDocumentRepository Document
+    {
+        get { return _document ??= new DocumentRepository(_context); }
+    }  
+    
+    private IDocumentStatusRepository? _documentStatus;
+
+    public IDocumentStatusRepository DocumentStatus
+    {
+        get { return _documentStatus ??= new DocumentStatusRepository(_context); }
+    }  
+    
+    private IDocumentTypeRepository? _documentType;
+
+    public IDocumentTypeRepository DocumentType
+    {
+        get { return _documentType ??= new DocumentTypeRepository(_context); }
+    }
 
     public void BeginTransaction()
     {

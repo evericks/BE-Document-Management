@@ -7,7 +7,9 @@ public interface IUnitOfWork
     public IRoleRepository Role { get; }
     public IDepartmentRepository Department { get; }
     public IUserRepository User { get; }
-    
+    public IDocumentRepository Document { get; }
+    public IDocumentStatusRepository DocumentStatus { get; }
+    public IDocumentTypeRepository DocumentType { get; }
     void BeginTransaction();
     
     void Commit();

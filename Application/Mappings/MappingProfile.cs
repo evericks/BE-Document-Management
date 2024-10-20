@@ -28,6 +28,21 @@ public class MappingProfile: Profile
         CreateMap<Department, DepartmentViewModel>();
         CreateMap<DepartmentCreateModel, Department>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
-        CreateMap<DepartmentUpdateModel, Department>();
+        CreateMap<DepartmentUpdateModel, Department>(); 
+        
+        CreateMap<Document, DocumentViewModel>();
+        CreateMap<DocumentCreateModel, Document>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<DocumentUpdateModel, Document>();   
+        
+        CreateMap<DocumentStatus, DocumentStatusViewModel>();
+        CreateMap<DocumentStatusCreateModel, DocumentStatus>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<DocumentStatusUpdateModel, DocumentStatus>(); 
+        
+        CreateMap<DocumentType, DocumentTypeViewModel>();
+        CreateMap<DocumentTypeCreateModel, DocumentType>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<DocumentTypeUpdateModel, DocumentType>();
     }
 }

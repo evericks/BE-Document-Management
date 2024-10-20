@@ -20,5 +20,8 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IDepartmentService, DepartmentService>();
+        services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<IDocumentStatusService, DocumentStatusService>();
+        services.AddScoped<IDocumentTypeService, DocumentTypeService>();
     }
 }
