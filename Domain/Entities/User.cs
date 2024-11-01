@@ -37,6 +37,8 @@ public partial class User
 
     public virtual ICollection<DocumentLog> DocumentLogs { get; set; } = new List<DocumentLog>();
 
+    public virtual ICollection<DocumentProcess> DocumentProcesses { get; set; } = new List<DocumentProcess>();
+
     public virtual ICollection<Document> DocumentReceivers { get; set; } = new List<Document>();
 
     public virtual ICollection<Document> DocumentSenders { get; set; } = new List<Document>();

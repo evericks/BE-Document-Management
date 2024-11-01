@@ -23,10 +23,10 @@ public class RoleService : BaseService, IRoleService
 
     public async Task<IActionResult> GetRoles()
     {
-        var deliveryCompanies = await _unitOfWork.Role.GetAll()
+        var roles = await _unitOfWork.Role.GetAll()
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<RoleViewModel>(_mapper.ConfigurationProvider).ToListAsync();
-        return new OkObjectResult(deliveryCompanies);
+        return new OkObjectResult(roles);
     }
 
     public async Task<IActionResult> GetRole(Guid id)

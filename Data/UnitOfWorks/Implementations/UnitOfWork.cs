@@ -58,6 +58,20 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _documentType ??= new DocumentTypeRepository(_context); }
     }
+    
+    private IProcessRepository? _process;
+
+    public IProcessRepository Process
+    {
+        get { return _process ??= new ProcessRepository(_context); }
+    }
+    
+    private IProcessStepRepository? _processStep;
+
+    public IProcessStepRepository ProcessStep
+    {
+        get { return _processStep ??= new ProcessStepRepository(_context); }
+    }
 
     public void BeginTransaction()
     {

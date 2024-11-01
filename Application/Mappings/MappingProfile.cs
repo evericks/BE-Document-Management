@@ -31,8 +31,10 @@ public class MappingProfile: Profile
         CreateMap<DepartmentUpdateModel, Department>(); 
         
         CreateMap<Document, DocumentViewModel>();
+        CreateMap<Document, DocumentDetailViewModel>();
         CreateMap<DocumentCreateModel, Document>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
+            .ForMember(dest => dest.Attachments, opt => opt.Ignore());
         CreateMap<DocumentUpdateModel, Document>();   
         
         CreateMap<DocumentStatus, DocumentStatusViewModel>();
@@ -41,8 +43,24 @@ public class MappingProfile: Profile
         CreateMap<DocumentStatusUpdateModel, DocumentStatus>(); 
         
         CreateMap<DocumentType, DocumentTypeViewModel>();
+        CreateMap<DocumentType, DocumentTypeDetailViewModel>();
         CreateMap<DocumentTypeCreateModel, DocumentType>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
         CreateMap<DocumentTypeUpdateModel, DocumentType>();
+        
+        CreateMap<Process, ProcessViewModel>()
+            .ForMember(dest => dest.ProcessSteps, opt => opt.MapFrom(src => src.ProcessSteps.OrderBy(x => x.StepNumber)));
+        CreateMap<ProcessCreateModel, Process>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<ProcessUpdateModel, Process>();
+        
+        CreateMap<ProcessStep, ProcessStepViewModel>();
+        CreateMap<ProcessStepCreateModel, ProcessStep>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<ProcessStepUpdateModel, ProcessStep>(); 
+        
+        CreateMap<Attachment, AttachmentViewModel>();
+        
+        CreateMap<DocumentProcess, DocumentProcessDetailViewModel>();
     }
 }

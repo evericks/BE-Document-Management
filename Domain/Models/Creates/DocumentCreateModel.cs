@@ -1,4 +1,6 @@
-﻿namespace Domain.Models.Creates;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace Domain.Models.Creates;
 
 public class DocumentCreateModel
 {
@@ -23,4 +25,5 @@ public class DocumentCreateModel
     public bool IsInternal { get; set; }
 
     public bool IsArchived { get; set; }
+    public ICollection<IFormFile>? Attachments { get; set; }
 }

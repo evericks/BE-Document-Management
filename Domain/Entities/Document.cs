@@ -41,6 +41,8 @@ public partial class Document
 
     public virtual ICollection<DocumentLog> DocumentLogs { get; set; } = new List<DocumentLog>();
 
+    public virtual ICollection<DocumentProcess> DocumentProcesses { get; set; } = new List<DocumentProcess>();
+
     public virtual DocumentType DocumentType { get; set; } = null!;
 
     public virtual User Receiver { get; set; } = null!;

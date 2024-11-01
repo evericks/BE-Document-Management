@@ -11,5 +11,7 @@ public partial class Role
 
     public DateTime CreatedAt { get; set; }
 
+    public virtual ICollection<ProcessStep> ProcessSteps { get; set; } = new List<ProcessStep>();
+
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

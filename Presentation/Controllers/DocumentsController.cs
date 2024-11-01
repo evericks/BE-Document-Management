@@ -46,7 +46,7 @@ public class DocumentController : Controller
     // POST
     [HttpPost]
     [Authorize]
-    public async Task<IActionResult> CreateDocument([FromBody] DocumentCreateModel model)
+    public async Task<IActionResult> CreateDocument([FromForm] DocumentCreateModel model)
     {
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateDocument(user.Id, model);

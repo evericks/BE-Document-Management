@@ -17,6 +17,7 @@ builder.Services.AddHangfire(sqlConnectionString);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddControllersWithViews().AddNewtonsoftJsonOptions();
+builder.Services.AddHttpClient();
 builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddCorsWithOptions(allowSpecificOrigins);
 builder.Services.AddControllers();
