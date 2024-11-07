@@ -14,11 +14,11 @@ public class DocumentCreateModel
 
     public string? Content { get; set; }
 
-    public Guid DocumentTypeId { get; set; }
+    public Guid? DocumentTypeId { get; set; }
 
-    public Guid StatusId { get; set; }
+    public Guid? StatusId { get; set; }
 
-    public Guid ReceiverId { get; set; }
+    public Guid? ReceiverId { get; set; }
 
     public DateTime? DueDate { get; set; }
 

@@ -28,6 +28,16 @@ public class DocumentController : Controller
     // GET
     [HttpGet]
     [Authorize]
+    [Route("users/drafting")]
+    public async Task<IActionResult> GetUserDraftDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserDraftDocuments(user.Id);
+    }
+    
+    // GET
+    [HttpGet]
+    [Authorize]
     [Route("users")]
     public async Task<IActionResult> GetUserDocuments()
     {
@@ -50,6 +60,36 @@ public class DocumentController : Controller
     {
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateDocument(user.Id, model);
+    }
+    
+    // POST
+    [HttpPost]
+    [Authorize]
+    [Route("outgoing")]
+    public async Task<IActionResult> CreateOutgoingDocument([FromForm] DocumentCreateModel model)
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.CreateOutgoingDocument(user.Id, model);
+    }
+    
+    // POST
+    [HttpPost]
+    [Authorize]
+    [Route("incoming")]
+    public async Task<IActionResult> CreateIncomingDocument([FromForm] DocumentCreateModel model)
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.CreateIncomingDocument(user.Id, model);
+    }
+    
+    // POST
+    [HttpPost]
+    [Authorize]
+    [Route("drafting")]
+    public async Task<IActionResult> CreateDraftDocument([FromForm] DocumentCreateModel model)
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.CreateDraftDocument(user.Id, model);
     }
         
     // PUT

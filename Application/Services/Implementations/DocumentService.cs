@@ -2,6 +2,7 @@
 using Application.Services.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using Common.Constants;
 using Data.EntityRepositories.Interfaces;
 using Data.UnitOfWorks.Interfaces;
 using Domain.Entities;
@@ -16,29 +17,43 @@ namespace Application.Services.Implementations;
 public class DocumentService : BaseService, IDocumentService
 {
     private readonly IDocumentRepository _documentRepository;
+    private readonly IDocumentStatusRepository _documentStatusRepository;
     private readonly IEvercloudService _evercloudService;
 
     public DocumentService(IUnitOfWork unitOfWork, IMapper mapper, IEvercloudService evercloudService) : base(
         unitOfWork, mapper)
     {
         _documentRepository = unitOfWork.Document;
+        _documentStatusRepository = unitOfWork.DocumentStatus;
         _evercloudService = evercloudService;
     }
 
     public async Task<IActionResult> GetDocuments()
     {
-        var deliveryCompanies = await _unitOfWork.Document.GetAll()
+        var documents = await _unitOfWork.Document.GetAll()
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
-        return new OkObjectResult(deliveryCompanies);
+        return new OkObjectResult(documents);
     }
 
     public async Task<IActionResult> GetUserDocuments(Guid id)
     {
-        var deliveryCompanies = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id))
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
+            .FirstOrDefaultAsync();
+        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && !x.StatusId.Equals(status!.Id))
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
-        return new OkObjectResult(deliveryCompanies);
+        return new OkObjectResult(documents);
+    }
+    
+    public async Task<IActionResult> GetUserDraftDocuments(Guid id)
+    {
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
+            .FirstOrDefaultAsync();
+        var documents = await _unitOfWork.Document.Where(x => x.SenderId.Equals(id) && x.StatusId.Equals(status!.Id))
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        return new OkObjectResult(documents);
     }
 
     public async Task<IActionResult> GetDocument(Guid id)
@@ -52,6 +67,94 @@ public class DocumentService : BaseService, IDocumentService
     {
         var document = _mapper.Map<Document>(model);
         document.SenderId = senderId;
+        if (model.Attachments != null)
+        {
+            foreach (var item in model.Attachments)
+            {
+                var upload = await _evercloudService.UploadAsync(item, "attachment");
+                if (upload?.Url == null) continue;
+                var attachment = new Attachment
+                {
+                    Id = Guid.NewGuid(),
+                    Url = upload.Url,
+                    Name = upload.FileName,
+                    DocumentId = document.Id,
+                    MediaType = upload.FileExtension,
+                };
+                document.Attachments.Add(attachment);
+            }
+        }
+        _documentRepository.Add(document);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> CreateOutgoingDocument(Guid senderId, DocumentCreateModel model)
+    {
+        var document = _mapper.Map<Document>(model);
+        document.SenderId = senderId;
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
+            .FirstOrDefaultAsync();
+        document.StatusId = status!.Id;
+        if (model.Attachments != null)
+        {
+            foreach (var item in model.Attachments)
+            {
+                var upload = await _evercloudService.UploadAsync(item, "attachment");
+                if (upload?.Url == null) continue;
+                var attachment = new Attachment
+                {
+                    Id = Guid.NewGuid(),
+                    Url = upload.Url,
+                    Name = upload.FileName,
+                    DocumentId = document.Id,
+                    MediaType = upload.FileExtension,
+                };
+                document.Attachments.Add(attachment);
+            }
+        }
+        _documentRepository.Add(document);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> CreateIncomingDocument(Guid senderId, DocumentCreateModel model)
+    {
+        var document = _mapper.Map<Document>(model);
+        document.SenderId = senderId;
+        document.ReceiverId = senderId;
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
+            .FirstOrDefaultAsync();
+        document.StatusId = status!.Id;
+        if (model.Attachments != null)
+        {
+            foreach (var item in model.Attachments)
+            {
+                var upload = await _evercloudService.UploadAsync(item, "attachment");
+                if (upload?.Url == null) continue;
+                var attachment = new Attachment
+                {
+                    Id = Guid.NewGuid(),
+                    Url = upload.Url,
+                    Name = upload.FileName,
+                    DocumentId = document.Id,
+                    MediaType = upload.FileExtension,
+                };
+                document.Attachments.Add(attachment);
+            }
+        }
+        _documentRepository.Add(document);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> CreateDraftDocument(Guid senderId, DocumentCreateModel model)
+    {
+        var document = _mapper.Map<Document>(model);
+        document.SenderId = senderId;
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
+            .FirstOrDefaultAsync();
+        document.StatusId = status!.Id;
         if (model.Attachments != null)
         {
             foreach (var item in model.Attachments)

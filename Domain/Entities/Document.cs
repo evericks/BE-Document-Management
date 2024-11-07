@@ -17,7 +17,7 @@ public partial class Document
 
     public string? Content { get; set; }
 
-    public Guid DocumentTypeId { get; set; }
+    public Guid? DocumentTypeId { get; set; }
 
     public Guid StatusId { get; set; }
 
@@ -43,7 +43,7 @@ public partial class Document
 
     public virtual ICollection<DocumentProcess> DocumentProcesses { get; set; } = new List<DocumentProcess>();
 
-    public virtual DocumentType DocumentType { get; set; } = null!;
+    public virtual DocumentType? DocumentType { get; set; }
 
     public virtual User Receiver { get; set; } = null!;
 

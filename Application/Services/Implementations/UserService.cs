@@ -6,6 +6,7 @@ using Data.EntityRepositories.Interfaces;
 using Data.UnitOfWorks.Interfaces;
 using Domain.Entities;
 using Domain.Models.Creates;
+using Domain.Models.Filters;
 using Domain.Models.Update;
 using Domain.Models.Views;
 using Microsoft.AspNetCore.Mvc;
@@ -22,9 +23,14 @@ public class UserService : BaseService, IUserService
         _userRepository = unitOfWork.User;
     }
 
-    public async Task<IActionResult> GetUsers()
+    public async Task<IActionResult> GetUsers(UserFilterModel filter)
     {
-        var deliveryCompanies = await _unitOfWork.User.GetAll()
+        var query = _unitOfWork.User.GetAll();
+        if (filter.DepartmentId != null)
+        {
+            query = query.Where(x => x.DepartmentId.Equals(filter.DepartmentId));
+        }
+        var deliveryCompanies = await query
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<UserViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(deliveryCompanies);

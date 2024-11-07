@@ -1,5 +1,6 @@
 ﻿using Application.Services.Interfaces;
 using Domain.Models.Creates;
+using Domain.Models.Filters;
 using Domain.Models.Update;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,9 +19,9 @@ public class UserController : Controller
     
     // GET
     [HttpGet]
-    public async Task<IActionResult> GetUsers()
+    public async Task<IActionResult> GetUsers([FromQuery] UserFilterModel filter)
     {
-        return await _userService.GetUsers();
+        return await _userService.GetUsers(filter);
     }
     
     // GET

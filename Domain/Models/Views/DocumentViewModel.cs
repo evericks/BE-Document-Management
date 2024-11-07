@@ -14,7 +14,7 @@ public class DocumentViewModel
 
     public string? Content { get; set; }
 
-    public Guid DocumentTypeId { get; set; }
+    public Guid? DocumentTypeId { get; set; }
 
     public Guid StatusId { get; set; }
 

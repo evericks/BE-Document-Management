@@ -26,7 +26,7 @@ public class DocumentDetailViewModel
 
     public ICollection<DocumentProcessDetailViewModel> DocumentProcesses { get; set; } = new List<DocumentProcessDetailViewModel>();
 
-    public DocumentTypeDetailViewModel DocumentType { get; set; } = null!;
+    public DocumentTypeDetailViewModel? DocumentType { get; set; }
 
     public UserViewModel Receiver { get; set; } = null!;
 
