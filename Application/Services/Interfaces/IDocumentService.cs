@@ -13,7 +13,12 @@ public interface IDocumentService
     Task<IActionResult> CreateOutgoingDocument(Guid senderId, DocumentCreateModel model);
     Task<IActionResult> CreateIncomingDocument(Guid senderId, DocumentCreateModel model);
     Task<IActionResult> CreateDraftDocument(Guid senderId, DocumentCreateModel model);
+    Task<IActionResult> GetUserUnClassifiedDocuments(Guid id);
     Task<IActionResult> GetUserDraftDocuments(Guid id);
+    Task<IActionResult> GetUserReceiveDocuments(Guid id);
     Task<IActionResult> UpdateDocument(Guid id, DocumentUpdateModel model);
+    Task<IActionResult> ReceiveDocument(Guid id);
+    Task<IActionResult> ReturnDocument(Guid id, ReturnDocumentUpdateModel model);
+    Task<IActionResult> ClassifyDocument(Guid id, Guid documentTypeId);
     Task<IActionResult> DeleteDocument(Guid id);
 }

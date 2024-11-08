@@ -47,6 +47,26 @@ public class DocumentController : Controller
     
     // GET
     [HttpGet]
+    [Authorize]
+    [Route("users/receive")]
+    public async Task<IActionResult> GetUserReceiveDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserReceiveDocuments(user.Id);
+    }
+    
+    // GET
+    [HttpGet]
+    [Authorize]
+    [Route("users/unclassified")]
+    public async Task<IActionResult> GetUserUnclassifiedDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserUnClassifiedDocuments(user.Id);
+    }
+    
+    // GET
+    [HttpGet]
     [Route("{id}")]
     public async Task<IActionResult> GetDocument([FromRoute] Guid id)
     {
@@ -98,6 +118,33 @@ public class DocumentController : Controller
     public async Task<IActionResult> UpdateDocument([FromRoute] Guid id, [FromBody] DocumentUpdateModel model)
     {
         return await _documentService.UpdateDocument(id, model);
+    }
+    
+    // PUT
+    [HttpPut]
+    [Authorize]
+    [Route("{id}/receive")]
+    public async Task<IActionResult> ReceiveDocument([FromRoute] Guid id)
+    {
+        return await _documentService.ReceiveDocument(id);
+    }
+    
+    // PUT
+    [HttpPut]
+    [Authorize]
+    [Route("{id}/return")]
+    public async Task<IActionResult> ReturnDocument([FromRoute] Guid id, ReturnDocumentUpdateModel model)
+    {
+        return await _documentService.ReturnDocument(id, model);
+    }
+    
+    // PUT
+    [HttpPut]
+    [Authorize]
+    [Route("{id}/classify/{documentTypeId}")]
+    public async Task<IActionResult> ClassifyDocument([FromRoute] Guid id, [FromRoute] Guid documentTypeId)
+    {
+        return await _documentService.ClassifyDocument(id, documentTypeId);
     }
     
     // DELETE

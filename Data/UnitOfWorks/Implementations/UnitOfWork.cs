@@ -72,6 +72,13 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _processStep ??= new ProcessStepRepository(_context); }
     }
+    
+    private IDocumentLogRepository? _documentLog;
+
+    public IDocumentLogRepository DocumentLog
+    {
+        get { return _documentLog ??= new DocumentLogRepository(_context); }
+    }
 
     public void BeginTransaction()
     {

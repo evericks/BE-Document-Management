@@ -12,6 +12,7 @@ public interface IUnitOfWork
     public IDocumentTypeRepository DocumentType { get; }
     public IProcessRepository Process { get; }
     public IProcessStepRepository ProcessStep { get; }
+    public IDocumentLogRepository DocumentLog { get; }
     void BeginTransaction();
     
     void Commit();

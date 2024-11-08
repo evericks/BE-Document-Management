@@ -18,6 +18,7 @@ public class DocumentService : BaseService, IDocumentService
 {
     private readonly IDocumentRepository _documentRepository;
     private readonly IDocumentStatusRepository _documentStatusRepository;
+    private readonly IDocumentLogRepository _documentLogRepository;
     private readonly IEvercloudService _evercloudService;
 
     public DocumentService(IUnitOfWork unitOfWork, IMapper mapper, IEvercloudService evercloudService) : base(
@@ -25,6 +26,7 @@ public class DocumentService : BaseService, IDocumentService
     {
         _documentRepository = unitOfWork.Document;
         _documentStatusRepository = unitOfWork.DocumentStatus;
+        _documentLogRepository = unitOfWork.DocumentLog;
         _evercloudService = evercloudService;
     }
 
@@ -41,6 +43,26 @@ public class DocumentService : BaseService, IDocumentService
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
             .FirstOrDefaultAsync();
         var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && !x.StatusId.Equals(status!.Id))
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        return new OkObjectResult(documents);
+    }
+    
+    public async Task<IActionResult> GetUserReceiveDocuments(Guid id)
+    {
+        var drafting = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
+            .FirstOrDefaultAsync();
+        var pendingApproval = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
+            .FirstOrDefaultAsync();
+        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && !x.StatusId.Equals(drafting!.Id) && x.StatusId.Equals(pendingApproval!.Id))
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        return new OkObjectResult(documents);
+    }
+    
+    public async Task<IActionResult> GetUserUnClassifiedDocuments(Guid id)
+    {
+        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && x.DocumentType == null)
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
@@ -123,7 +145,7 @@ public class DocumentService : BaseService, IDocumentService
         var document = _mapper.Map<Document>(model);
         document.SenderId = senderId;
         document.ReceiverId = senderId;
-        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
             .FirstOrDefaultAsync();
         document.StatusId = status!.Id;
         if (model.Attachments != null)
@@ -187,6 +209,77 @@ public class DocumentService : BaseService, IDocumentService
 
         _mapper.Map(model, document);
         _documentRepository.Update(document);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> ReceiveDocument(Guid id)
+    {
+        var document = await _documentRepository.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+        if (document == null)
+        {
+            return new NotFoundResult();
+        }
+        var receive = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
+            .FirstOrDefaultAsync();
+        document.StatusId = receive!.Id;
+        _documentRepository.Update(document);
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = document.ReceiverId,
+            Action = DocumentLogs.Receive
+        };
+        _documentLogRepository.Add(documentLog);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> ReturnDocument(Guid id, ReturnDocumentUpdateModel model)
+    {
+        var document = await _documentRepository.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+        if (document == null)
+        {
+            return new NotFoundResult();
+        }
+        var returned = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Returned))
+            .FirstOrDefaultAsync();
+        document.StatusId = returned!.Id;
+        _documentRepository.Update(document);
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = document.ReceiverId,
+            Action = DocumentLogs.Return,
+            Note = model.Message
+        };
+        _documentLogRepository.Add(documentLog);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+    
+    public async Task<IActionResult> ClassifyDocument(Guid id, Guid documentTypeId)
+    {
+        var document = await _documentRepository.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+        if (document == null)
+        {
+            return new NotFoundResult();
+        }
+        var classified = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Classified))
+            .FirstOrDefaultAsync();
+        document.StatusId = classified!.Id;
+        document.DocumentTypeId = documentTypeId;
+        _documentRepository.Update(document);
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = document.ReceiverId,
+            Action = DocumentLogs.Classify,
+        };
+        _documentLogRepository.Add(documentLog);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
     }
