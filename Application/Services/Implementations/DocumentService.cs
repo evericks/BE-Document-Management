@@ -77,6 +77,16 @@ public class DocumentService : BaseService, IDocumentService
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
     }
+    
+    public async Task<IActionResult> GetUserPendingProcessingDocuments(Guid id)
+    {
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
+            .FirstOrDefaultAsync();
+        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && x.StatusId.Equals(status!.Id))
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        return new OkObjectResult(documents);
+    }
 
     public async Task<IActionResult> GetDocument(Guid id)
     {
@@ -267,7 +277,7 @@ public class DocumentService : BaseService, IDocumentService
         {
             return new NotFoundResult();
         }
-        var classified = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Classified))
+        var classified = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
             .FirstOrDefaultAsync();
         document.StatusId = classified!.Id;
         document.DocumentTypeId = documentTypeId;

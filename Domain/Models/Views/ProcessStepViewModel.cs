@@ -10,7 +10,7 @@ public class ProcessStepViewModel
 
     public string? Description { get; set; }
 
-    public Guid RoleId { get; set; }
+    public Guid? RoleId { get; set; } = null!;
 
     public DateTime CreatedAt { get; set; }
 }

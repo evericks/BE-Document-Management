@@ -35,17 +35,24 @@ public class ProcessService : BaseService, IProcessService
             .ProjectTo<ProcessViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
         return new OkObjectResult(process);
     }
-    
-    public async Task<IActionResult> GetDocumentTypeProcess(Guid id)
-    {
-        var process = await _unitOfWork.Process.Where(x => x.DocumentTypeId.Equals(id))
-            .ProjectTo<ProcessViewModel>(_mapper.ConfigurationProvider).FirstOrDefaultAsync();
-        return new OkObjectResult(process);
-    }
 
     public async Task<IActionResult> CreateProcess(ProcessCreateModel model)
     {
         var process = _mapper.Map<Process>(model);
+        if (model.ProcessSteps.Count == 0)
+        {
+            process.ProcessSteps.Add(new ProcessStep()
+            {
+                Id = Guid.NewGuid(),
+                ProcessId = process.Id,
+                Name = "Hoàn Thành",
+                StepNumber = 1
+            });
+        }
+        foreach (var item in process.ProcessSteps)
+        {
+            item.ProcessId = process.Id;
+        }
         _processRepository.Add(process);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetProcess(process.Id) : new BadRequestResult();

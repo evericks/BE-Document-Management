@@ -8,5 +8,5 @@ public class DocumentTypeDetailViewModel
 
     public DateTime CreatedAt { get; set; }
 
-    public ICollection<ProcessViewModel> Processes { get; set; } = new List<ProcessViewModel>();
+    public ProcessViewModel Process { get; set; } = null!;
 }

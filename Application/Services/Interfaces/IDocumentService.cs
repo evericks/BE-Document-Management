@@ -15,6 +15,7 @@ public interface IDocumentService
     Task<IActionResult> CreateDraftDocument(Guid senderId, DocumentCreateModel model);
     Task<IActionResult> GetUserUnClassifiedDocuments(Guid id);
     Task<IActionResult> GetUserDraftDocuments(Guid id);
+    Task<IActionResult> GetUserPendingProcessingDocuments(Guid id);
     Task<IActionResult> GetUserReceiveDocuments(Guid id);
     Task<IActionResult> UpdateDocument(Guid id, DocumentUpdateModel model);
     Task<IActionResult> ReceiveDocument(Guid id);

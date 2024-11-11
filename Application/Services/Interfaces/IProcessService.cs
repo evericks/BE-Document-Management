@@ -8,7 +8,6 @@ public interface IProcessService
 {
     Task<IActionResult> GetProcesses();
     Task<IActionResult> GetProcess(Guid id);
-    Task<IActionResult> GetDocumentTypeProcess(Guid id);
     Task<IActionResult> CreateProcess(ProcessCreateModel model);
     Task<IActionResult> UpdateProcess(Guid id, ProcessUpdateModel model);
     Task<IActionResult> DeleteProcess(Guid id);

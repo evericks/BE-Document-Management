@@ -11,7 +11,9 @@ public partial class DocumentType
 
     public DateTime CreatedAt { get; set; }
 
+    public Guid? ProcessId { get; set; }
+
     public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
 
-    public virtual ICollection<Process> Processes { get; set; } = new List<Process>();
+    public virtual Process? Process { get; set; }
 }

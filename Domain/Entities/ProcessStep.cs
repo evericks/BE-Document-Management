@@ -15,7 +15,7 @@ public partial class ProcessStep
 
     public string? Description { get; set; }
 
-    public Guid RoleId { get; set; }
+    public Guid? RoleId { get; set; }
 
     public DateTime CreatedAt { get; set; }
 
@@ -23,5 +23,5 @@ public partial class ProcessStep
 
     public virtual Process Process { get; set; } = null!;
 
-    public virtual Role Role { get; set; } = null!;
+    public virtual Role? Role { get; set; }
 }

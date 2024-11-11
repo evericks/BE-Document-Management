@@ -31,14 +31,6 @@ public class ProcessController : Controller
         return await _processService.GetProcess(id);
     }
     
-    // GET
-    [HttpGet]
-    [Route("document-types/{id}")]
-    public async Task<IActionResult>? GetDocumentTypeProcess([FromRoute] Guid id)
-    {
-        return await _processService.GetDocumentTypeProcess(id);
-    }
-    
     // POST
     [HttpPost]
     public async Task<IActionResult> CreateProcess([FromBody] ProcessCreateModel model)

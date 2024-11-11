@@ -67,6 +67,16 @@ public class DocumentController : Controller
     
     // GET
     [HttpGet]
+    [Authorize]
+    [Route("users/pending-processing")]
+    public async Task<IActionResult> GetUserPendingProcessingDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserPendingProcessingDocuments(user.Id);
+    }
+    
+    // GET
+    [HttpGet]
     [Route("{id}")]
     public async Task<IActionResult> GetDocument([FromRoute] Guid id)
     {
