@@ -2,5 +2,5 @@
 
 public class ProcessUpdateModel
 {
-    
+    public string? Name { get; set; }
 }
