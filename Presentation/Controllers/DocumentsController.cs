@@ -58,6 +58,16 @@ public class DocumentController : Controller
     // GET
     [HttpGet]
     [Authorize]
+    [Route("users/return")]
+    public async Task<IActionResult> GetUserReturnDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserReturnDocuments(user.Id);
+    }
+    
+    // GET
+    [HttpGet]
+    [Authorize]
     [Route("users/unclassified")]
     public async Task<IActionResult> GetUserUnclassifiedDocuments()
     {

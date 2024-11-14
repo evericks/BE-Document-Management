@@ -8,6 +8,7 @@ public interface IDocumentService
 {
     Task<IActionResult> GetDocuments();
     Task<IActionResult> GetUserDocuments(Guid id);
+    Task<IActionResult> GetUserReturnDocuments(Guid id);
     Task<IActionResult> GetDocument(Guid id);
     Task<IActionResult> CreateDocument(Guid senderId, DocumentCreateModel model);
     Task<IActionResult> CreateOutgoingDocument(Guid senderId, DocumentCreateModel model);

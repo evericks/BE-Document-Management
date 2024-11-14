@@ -32,5 +32,7 @@ public class DocumentDetailViewModel
 
     public UserViewModel Sender { get; set; } = null!;
 
+    public ICollection<DocumentLogViewModel> DocumentLogs { get; set; } = new List<DocumentLogViewModel>();
+
     public DocumentStatusViewModel Status { get; set; } = null!;
 }

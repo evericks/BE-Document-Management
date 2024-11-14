@@ -64,6 +64,8 @@ public class MappingProfile: Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
         CreateMap<OrganizationUpdateModel, Organization>(); 
         
+        CreateMap<DocumentLog, DocumentLogViewModel>();
+        
         CreateMap<Attachment, AttachmentViewModel>();
         
         CreateMap<DocumentProcess, DocumentProcessDetailViewModel>();
