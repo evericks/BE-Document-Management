@@ -59,6 +59,11 @@ public class MappingProfile: Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
         CreateMap<ProcessStepUpdateModel, ProcessStep>(); 
         
+        CreateMap<Organization, OrganizationViewModel>();
+        CreateMap<OrganizationCreateModel, Organization>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()));
+        CreateMap<OrganizationUpdateModel, Organization>(); 
+        
         CreateMap<Attachment, AttachmentViewModel>();
         
         CreateMap<DocumentProcess, DocumentProcessDetailViewModel>();

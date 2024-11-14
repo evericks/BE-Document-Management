@@ -13,6 +13,7 @@ public interface IUnitOfWork
     public IProcessRepository Process { get; }
     public IProcessStepRepository ProcessStep { get; }
     public IDocumentLogRepository DocumentLog { get; }
+    public IOrganizationRepository Organization { get; }
     void BeginTransaction();
     
     void Commit();

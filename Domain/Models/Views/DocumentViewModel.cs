@@ -6,8 +6,6 @@ public class DocumentViewModel
 
     public string Code { get; set; } = null!;
 
-    public string IssuingAgency { get; set; } = null!;
-
     public string Name { get; set; } = null!;
 
     public bool IsImportant { get; set; }
@@ -15,6 +13,8 @@ public class DocumentViewModel
     public string? Content { get; set; }
 
     public Guid? DocumentTypeId { get; set; }
+    
+    public Guid OrganizationId { get; set; }
 
     public Guid StatusId { get; set; }
 

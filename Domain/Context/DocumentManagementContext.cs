@@ -46,6 +46,8 @@ public partial class DocumentManagementContext : DbContext
 
     public virtual DbSet<List> Lists { get; set; }
 
+    public virtual DbSet<Organization> Organizations { get; set; }
+
     public virtual DbSet<Process> Processes { get; set; }
 
     public virtual DbSet<ProcessStep> ProcessSteps { get; set; }
@@ -130,7 +132,6 @@ public partial class DocumentManagementContext : DbContext
 
             entity.HasOne(d => d.Document).WithMany(p => p.Attachments)
                 .HasForeignKey(d => d.DocumentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Attachmen__Docum__656C112C");
         });
 
@@ -172,11 +173,14 @@ public partial class DocumentManagementContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("datetime");
-            entity.Property(e => e.IssuingAgency).HasMaxLength(256);
 
             entity.HasOne(d => d.DocumentType).WithMany(p => p.Documents)
                 .HasForeignKey(d => d.DocumentTypeId)
                 .HasConstraintName("FK__Document__Docume__5CD6CB2B");
+
+            entity.HasOne(d => d.Organization).WithMany(p => p.Documents)
+                .HasForeignKey(d => d.OrganizationId)
+                .HasConstraintName("Document_Organization_Id_fk");
 
             entity.HasOne(d => d.Receiver).WithMany(p => p.DocumentReceivers)
                 .HasForeignKey(d => d.ReceiverId)
@@ -231,7 +235,6 @@ public partial class DocumentManagementContext : DbContext
 
             entity.HasOne(d => d.Document).WithMany(p => p.DocumentLogs)
                 .HasForeignKey(d => d.DocumentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__DocumentL__Docum__693CA210");
 
             entity.HasOne(d => d.User).WithMany(p => p.DocumentLogs)
@@ -255,7 +258,6 @@ public partial class DocumentManagementContext : DbContext
 
             entity.HasOne(d => d.Document).WithMany(p => p.DocumentProcesses)
                 .HasForeignKey(d => d.DocumentId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__DocumentP__Docum__2CF2ADDF");
 
             entity.HasOne(d => d.ProcessBy).WithMany(p => p.DocumentProcesses)
@@ -361,6 +363,19 @@ public partial class DocumentManagementContext : DbContext
             entity.Property(e => e.Key).HasMaxLength(100);
             entity.Property(e => e.Id).ValueGeneratedOnAdd();
             entity.Property(e => e.ExpireAt).HasColumnType("datetime");
+        });
+
+        modelBuilder.Entity<Organization>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Organiza__3214EC070929DBB1");
+
+            entity.ToTable("Organization");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Name).HasMaxLength(256);
         });
 
         modelBuilder.Entity<Process>(entity =>

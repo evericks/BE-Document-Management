@@ -79,6 +79,13 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _documentLog ??= new DocumentLogRepository(_context); }
     }
+    
+    private IOrganizationRepository? _organization;
+
+    public IOrganizationRepository Organization
+    {
+        get { return _organization ??= new OrganizationRepository(_context); }
+    }
 
     public void BeginTransaction()
     {

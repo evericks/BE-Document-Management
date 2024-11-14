@@ -9,8 +9,6 @@ public partial class Document
 
     public string Code { get; set; } = null!;
 
-    public string IssuingAgency { get; set; } = null!;
-
     public string Name { get; set; } = null!;
 
     public bool IsImportant { get; set; }
@@ -33,6 +31,8 @@ public partial class Document
 
     public DateTime CreatedAt { get; set; }
 
+    public Guid OrganizationId { get; set; }
+
     public virtual ICollection<Archive> Archives { get; set; } = new List<Archive>();
 
     public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
@@ -44,6 +44,8 @@ public partial class Document
     public virtual ICollection<DocumentProcess> DocumentProcesses { get; set; } = new List<DocumentProcess>();
 
     public virtual DocumentType? DocumentType { get; set; }
+
+    public virtual Organization Organization { get; set; } = null!;
 
     public virtual User Receiver { get; set; } = null!;
 

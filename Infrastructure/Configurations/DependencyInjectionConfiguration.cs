@@ -27,5 +27,6 @@ public static class DependencyInjectionConfiguration
         services.AddScoped<IDocumentStatusService, DocumentStatusService>();
         services.AddScoped<IDocumentTypeService, DocumentTypeService>();
         services.AddScoped<IProcessService, ProcessService>();
+        services.AddScoped<IOrganizationService, OrganizationService>();
     }
 }

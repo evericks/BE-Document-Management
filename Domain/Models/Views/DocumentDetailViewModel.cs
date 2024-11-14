@@ -6,7 +6,7 @@ public class DocumentDetailViewModel
 
     public string Code { get; set; } = null!;
 
-    public string IssuingAgency { get; set; } = null!;
+    public OrganizationViewModel Organization { get; set; } = null!;
 
     public string Name { get; set; } = null!;
 
