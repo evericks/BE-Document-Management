@@ -1,4 +1,6 @@
-﻿using Application.Services.Interfaces;
+﻿using Application.Services.Evercloud.Models;
+using Application.Services.Evercloud.Services.Interfaces;
+using Application.Services.Interfaces;
 using Common.Extensions;
 using Domain.Models.Creates;
 using Domain.Models.Update;
@@ -12,19 +14,29 @@ namespace Presentation.Controllers;
 public class DocumentController : Controller
 {
     private readonly IDocumentService _documentService;
+    private readonly IEvercloudService _evercloudService;
 
-    public DocumentController(IDocumentService documentService)
+    public DocumentController(IDocumentService documentService, IEvercloudService evercloudService)
     {
         _documentService = documentService;
+        _evercloudService = evercloudService;
     }
-    
+
     // GET
     [HttpGet]
     public async Task<IActionResult> GetDocuments()
     {
         return await _documentService.GetDocuments();
     }
-    
+
+    [HttpPost]
+    [Route("preview")]
+    public async Task<IActionResult> UploadFiles([FromForm] UploadFileCreateModel model)
+    {
+        var upload = await _evercloudService.UploadAsync(model.File, "preview");
+        return new OkObjectResult(upload);
+    }
+
     // GET
     [HttpGet]
     [Authorize]
@@ -34,7 +46,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserDraftDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Authorize]
@@ -44,7 +56,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Authorize]
@@ -54,7 +66,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserReceiveDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Authorize]
@@ -64,7 +76,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserReturnDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Authorize]
@@ -74,7 +86,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserUnClassifiedDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Authorize]
@@ -84,7 +96,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.GetUserPendingProcessingDocuments(user.Id);
     }
-    
+
     // GET
     [HttpGet]
     [Route("{id}")]
@@ -92,7 +104,7 @@ public class DocumentController : Controller
     {
         return await _documentService.GetDocument(id);
     }
-    
+
     // POST
     [HttpPost]
     [Authorize]
@@ -101,7 +113,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateDocument(user.Id, model);
     }
-    
+
     // POST
     [HttpPost]
     [Authorize]
@@ -111,7 +123,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateOutgoingDocument(user.Id, model);
     }
-    
+
     // POST
     [HttpPost]
     [Authorize]
@@ -121,7 +133,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateIncomingDocument(user.Id, model);
     }
-    
+
     // POST
     [HttpPost]
     [Authorize]
@@ -131,7 +143,7 @@ public class DocumentController : Controller
         var user = this.GetAuthenticatedUser();
         return await _documentService.CreateDraftDocument(user.Id, model);
     }
-        
+
     // PUT
     [HttpPut]
     [Route("{id}")]
@@ -139,7 +151,7 @@ public class DocumentController : Controller
     {
         return await _documentService.UpdateDocument(id, model);
     }
-    
+
     // PUT
     [HttpPut]
     [Authorize]
@@ -148,7 +160,7 @@ public class DocumentController : Controller
     {
         return await _documentService.ReceiveDocument(id);
     }
-    
+
     // PUT
     [HttpPut]
     [Authorize]
@@ -157,7 +169,7 @@ public class DocumentController : Controller
     {
         return await _documentService.ReturnDocument(id, model);
     }
-    
+
     // PUT
     [HttpPut]
     [Authorize]
@@ -166,7 +178,7 @@ public class DocumentController : Controller
     {
         return await _documentService.ClassifyDocument(id, documentTypeId);
     }
-    
+
     // DELETE
     [HttpDelete]
     [Route("{id}")]
