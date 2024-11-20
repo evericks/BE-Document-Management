@@ -31,7 +31,8 @@ public class MappingProfile: Profile
         CreateMap<DepartmentUpdateModel, Department>(); 
         
         CreateMap<Document, DocumentViewModel>();
-        CreateMap<Document, DocumentDetailViewModel>();
+        CreateMap<Document, DocumentDetailViewModel>()
+            .ForMember(dest => dest.DocumentLogs, opt => opt.MapFrom(x => x.DocumentLogs.OrderBy(y => y.CreatedAt)));
         CreateMap<DocumentCreateModel, Document>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Guid.NewGuid()))
             .ForMember(dest => dest.Attachments, opt => opt.Ignore());

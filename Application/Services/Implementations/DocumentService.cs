@@ -37,6 +37,15 @@ public class DocumentService : BaseService, IDocumentService
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
     }
+    
+    public async Task<IActionResult> GetUserReferenceDocuments(Guid userId)
+    {
+        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(userId) || x.SenderId.Equals(userId)
+            || x.DocumentLogs.Any(y => y.UserId.Equals(userId)))
+            .OrderByDescending(x => x.CreatedAt)
+            .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
+        return new OkObjectResult(documents);
+    }
 
     public async Task<IActionResult> GetUserDocuments(Guid id)
     {
@@ -61,7 +70,7 @@ public class DocumentService : BaseService, IDocumentService
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
     }
-    
+
     public async Task<IActionResult> GetUserReturnDocuments(Guid id)
     {
         var returned = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Returned))
@@ -129,7 +138,7 @@ public class DocumentService : BaseService, IDocumentService
                 document.Attachments.Add(attachment);
             }
         }
-
+        
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -159,6 +168,15 @@ public class DocumentService : BaseService, IDocumentService
                 document.Attachments.Add(attachment);
             }
         }
+        
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = senderId,
+            Action = DocumentLogs.CreateOutgoing
+        };
+        _documentLogRepository.Add(documentLog);
 
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -194,6 +212,15 @@ public class DocumentService : BaseService, IDocumentService
             }
         }
 
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = senderId,
+            Action = DocumentLogs.CreateIncoming
+        };
+        _documentLogRepository.Add(documentLog);
+        
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -253,18 +280,40 @@ public class DocumentService : BaseService, IDocumentService
 
         var receive = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
             .FirstOrDefaultAsync();
-        document.StatusId = receive!.Id;
-        _documentRepository.Update(document);
-        var documentLog = new DocumentLog()
+
+        if (await IsReturnedDocument(document.Id))
         {
-            Id = Guid.NewGuid(),
-            DocumentId = document.Id,
-            UserId = document.ReceiverId,
-            Action = DocumentLogs.Receive
-        };
-        _documentLogRepository.Add(documentLog);
-        var result = await _unitOfWork.SaveChangesAsync();
-        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+            var returnById = document.ReceiverId;
+            document.StatusId = receive!.Id;
+            document.ReceiverId = document.SenderId;
+            document.SenderId = returnById;
+            _documentRepository.Update(document);
+            var documentLog = new DocumentLog()
+            {
+                Id = Guid.NewGuid(),
+                DocumentId = document.Id,
+                UserId = returnById,
+                Action = DocumentLogs.Receive
+            };
+            _documentLogRepository.Add(documentLog);
+            var result = await _unitOfWork.SaveChangesAsync();
+            return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+        }
+        else
+        {
+            document.StatusId = receive!.Id;
+            _documentRepository.Update(document);
+            var documentLog = new DocumentLog()
+            {
+                Id = Guid.NewGuid(),
+                DocumentId = document.Id,
+                UserId = document.ReceiverId,
+                Action = DocumentLogs.Receive
+            };
+            _documentLogRepository.Add(documentLog);
+            var result = await _unitOfWork.SaveChangesAsync();
+            return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+        }
     }
 
     public async Task<IActionResult> ReturnDocument(Guid id, ReturnDocumentUpdateModel model)
@@ -277,14 +326,45 @@ public class DocumentService : BaseService, IDocumentService
 
         var returned = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Returned))
             .FirstOrDefaultAsync();
+        var returnById = document.ReceiverId;
         document.StatusId = returned!.Id;
+        document.ReceiverId = document.SenderId;
+        document.SenderId = returnById;
         _documentRepository.Update(document);
         var documentLog = new DocumentLog()
         {
             Id = Guid.NewGuid(),
             DocumentId = document.Id,
-            UserId = document.ReceiverId,
+            UserId = returnById,
             Action = DocumentLogs.Return,
+            Note = model.Message
+        };
+        _documentLogRepository.Add(documentLog);
+        var result = await _unitOfWork.SaveChangesAsync();
+        return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
+    }
+
+    public async Task<IActionResult> SendDocument(Guid id, Guid senderId, SendDocumentUpdateModel model)
+    {
+        var document = await _documentRepository.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
+        if (document == null)
+        {
+            return new NotFoundResult();
+        }
+
+        var pendingApproval = await _documentStatusRepository
+            .Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
+            .FirstOrDefaultAsync();
+        document.StatusId = pendingApproval!.Id;
+        document.SenderId = senderId;
+        document.ReceiverId = model.ReceiverId;
+        _documentRepository.Update(document);
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = senderId,
+            Action = DocumentLogs.Send,
             Note = model.Message
         };
         _documentLogRepository.Add(documentLog);
@@ -330,5 +410,12 @@ public class DocumentService : BaseService, IDocumentService
         _documentRepository.Delete(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? new NoContentResult() : new BadRequestResult();
+    }
+
+    private async Task<bool> IsReturnedDocument(Guid id)
+    {
+        var returned =
+            await _documentStatusRepository.FirstOrDefaultAsync(x => x.Name.Equals(DocumentStatuses.Returned));
+        return _documentRepository.Any(x => x.Id.Equals(id) && x.StatusId.Equals(returned.Id));
     }
 }

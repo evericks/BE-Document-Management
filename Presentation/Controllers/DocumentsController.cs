@@ -28,6 +28,16 @@ public class DocumentController : Controller
     {
         return await _documentService.GetDocuments();
     }
+    
+    // GET
+    [HttpGet]
+    [Authorize]
+    [Route("users/references")]
+    public async Task<IActionResult> GetReferenceDocuments()
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.GetUserReferenceDocuments(user.Id);
+    }
 
     [HttpPost]
     [Route("preview")]
@@ -168,6 +178,16 @@ public class DocumentController : Controller
     public async Task<IActionResult> ReturnDocument([FromRoute] Guid id, ReturnDocumentUpdateModel model)
     {
         return await _documentService.ReturnDocument(id, model);
+    }
+    
+    // PUT
+    [HttpPut]
+    [Authorize]
+    [Route("{id}/send")]
+    public async Task<IActionResult> SendDocument([FromRoute] Guid id, SendDocumentUpdateModel model)
+    {
+        var user = this.GetAuthenticatedUser();
+        return await _documentService.SendDocument(id, user.Id, model);
     }
 
     // PUT
