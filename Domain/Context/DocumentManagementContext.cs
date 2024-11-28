@@ -12,6 +12,10 @@ public partial class DocumentManagementContext : DbContext
     {
     }
 
+    public virtual DbSet<AdditionalInformation> AdditionalInformations { get; set; }
+
+    public virtual DbSet<AdditionalInformationDetail> AdditionalInformationDetails { get; set; }
+
     public virtual DbSet<AggregatedCounter> AggregatedCounters { get; set; }
 
     public virtual DbSet<Archive> Archives { get; set; }
@@ -66,6 +70,48 @@ public partial class DocumentManagementContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AdditionalInformation>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Addition__3214EC070A4ADB7E");
+
+            entity.ToTable("AdditionalInformation");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Description).HasMaxLength(256);
+            entity.Property(e => e.Name).HasMaxLength(256);
+
+            entity.HasOne(d => d.DocumentType).WithMany(p => p.AdditionalInformations)
+                .HasForeignKey(d => d.DocumentTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Additiona__Docum__4F47C5E3");
+        });
+
+        modelBuilder.Entity<AdditionalInformationDetail>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Addition__3214EC074BBFBACF");
+
+            entity.ToTable("AdditionalInformationDetail");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.Value).HasMaxLength(256);
+
+            entity.HasOne(d => d.AdditionalInformation).WithMany(p => p.AdditionalInformationDetails)
+                .HasForeignKey(d => d.AdditionalInformationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Additiona__Addit__531856C7");
+
+            entity.HasOne(d => d.Document).WithMany(p => p.AdditionalInformationDetails)
+                .HasForeignKey(d => d.DocumentId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Additiona__Docum__540C7B00");
+        });
+
         modelBuilder.Entity<AggregatedCounter>(entity =>
         {
             entity.HasKey(e => e.Key).HasName("PK_HangFire_CounterAggregated");
@@ -173,12 +219,13 @@ public partial class DocumentManagementContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
             entity.Property(e => e.DueDate).HasColumnType("datetime");
+            entity.Property(e => e.SendingMethod).HasMaxLength(256);
 
             entity.HasOne(d => d.DocumentType).WithMany(p => p.Documents)
                 .HasForeignKey(d => d.DocumentTypeId)
                 .HasConstraintName("FK__Document__Docume__5CD6CB2B");
 
-            entity.HasOne(d => d.Organization).WithMany(p => p.Documents)
+            entity.HasOne(d => d.Organization).WithMany(p => p.DocumentOrganizations)
                 .HasForeignKey(d => d.OrganizationId)
                 .HasConstraintName("Document_Organization_Id_fk");
 
@@ -186,6 +233,10 @@ public partial class DocumentManagementContext : DbContext
                 .HasForeignKey(d => d.ReceiverId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Document__Receiv__5FB337D6");
+
+            entity.HasOne(d => d.ReceivingAgency).WithMany(p => p.DocumentReceivingAgencies)
+                .HasForeignKey(d => d.ReceivingAgencyId)
+                .HasConstraintName("FK__Document__Receiv__55F4C372");
 
             entity.HasOne(d => d.Sender).WithMany(p => p.DocumentSenders)
                 .HasForeignKey(d => d.SenderId)
@@ -291,6 +342,7 @@ public partial class DocumentManagementContext : DbContext
             entity.ToTable("DocumentType");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Character).HasMaxLength(256);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");
@@ -372,6 +424,7 @@ public partial class DocumentManagementContext : DbContext
             entity.ToTable("Organization");
 
             entity.Property(e => e.Id).ValueGeneratedNever();
+            entity.Property(e => e.Character).HasMaxLength(256);
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime");

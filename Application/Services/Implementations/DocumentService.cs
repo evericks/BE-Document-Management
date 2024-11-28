@@ -12,6 +12,7 @@ using Domain.Models.Update;
 using Domain.Models.Views;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations.Internal;
 
 namespace Application.Services.Implementations;
 
@@ -19,6 +20,8 @@ public class DocumentService : BaseService, IDocumentService
 {
     private readonly IDocumentRepository _documentRepository;
     private readonly IDocumentStatusRepository _documentStatusRepository;
+    private readonly IDocumentTypeRepository _documentTypeRepository;
+    private readonly IOrganizationRepository _organizationRepository;
     private readonly IDocumentLogRepository _documentLogRepository;
     private readonly IAdditionalInformationDetailRepository _additionalInformationDetailRepository;
     private readonly IEvercloudService _evercloudService;
@@ -30,6 +33,8 @@ public class DocumentService : BaseService, IDocumentService
         _documentStatusRepository = unitOfWork.DocumentStatus;
         _documentLogRepository = unitOfWork.DocumentLog;
         _additionalInformationDetailRepository = unitOfWork.AdditionalInformationDetail;
+        _documentTypeRepository = unitOfWork.DocumentType;
+        _organizationRepository = unitOfWork.Organization;
         _evercloudService = evercloudService;
     }
 
@@ -87,7 +92,10 @@ public class DocumentService : BaseService, IDocumentService
 
     public async Task<IActionResult> GetUserUnClassifiedDocuments(Guid id)
     {
-        var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(id) && x.DocumentType == null)
+        var received = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
+            .FirstOrDefaultAsync();
+        var documents = await _unitOfWork.Document
+            .Where(x => x.ReceiverId.Equals(id) && x.DocumentType == null && x.StatusId.Equals(received!.Id))
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
@@ -150,7 +158,9 @@ public class DocumentService : BaseService, IDocumentService
     public async Task<IActionResult> CreateOutgoingDocument(Guid senderId, DocumentCreateModel model)
     {
         var document = _mapper.Map<Document>(model);
-        document.Code = DocumentCodeHelper.GenerateCode("VB", "TDDC");
+        var agencyCharacter = await _organizationRepository.Where(x => x.Id.Equals(model.OrganizationId))
+            .Select(x => x.Character).FirstOrDefaultAsync();
+        document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
         document.SenderId = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
             .FirstOrDefaultAsync();
@@ -181,7 +191,6 @@ public class DocumentService : BaseService, IDocumentService
             Action = DocumentLogs.CreateOutgoing
         };
         _documentLogRepository.Add(documentLog);
-
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -190,12 +199,14 @@ public class DocumentService : BaseService, IDocumentService
     public async Task<IActionResult> CreateIncomingDocument(Guid senderId, DocumentCreateModel model)
     {
         var document = _mapper.Map<Document>(model);
+        var agencyCharacter = await _organizationRepository.Where(x => x.Id.Equals(model.OrganizationId))
+            .Select(x => x.Character).FirstOrDefaultAsync();
+        document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
         document.SenderId = senderId;
-        document.ReceiverId = senderId;
-        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
+        document.ReceiverId = (Guid)model.ReceiverId!;
+        var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
             .FirstOrDefaultAsync();
         document.StatusId = status!.Id;
-        
         if (model.Attachments != null)
         {
             foreach (var item in model.Attachments)
@@ -222,7 +233,6 @@ public class DocumentService : BaseService, IDocumentService
             Action = DocumentLogs.CreateIncoming
         };
         _documentLogRepository.Add(documentLog);
-
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -231,6 +241,9 @@ public class DocumentService : BaseService, IDocumentService
     public async Task<IActionResult> CreateDraftDocument(Guid senderId, DocumentCreateModel model)
     {
         var document = _mapper.Map<Document>(model);
+        var agencyCharacter = await _organizationRepository.Where(x => x.Id.Equals(model.OrganizationId))
+            .Select(x => x.Character).FirstOrDefaultAsync();
+        document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
         document.SenderId = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
             .FirstOrDefaultAsync();
@@ -252,6 +265,15 @@ public class DocumentService : BaseService, IDocumentService
                 document.Attachments.Add(attachment);
             }
         }
+
+        var documentLog = new DocumentLog()
+        {
+            Id = Guid.NewGuid(),
+            DocumentId = document.Id,
+            UserId = senderId,
+            Action = DocumentLogs.CreateDraft
+        };
+        _documentLogRepository.Add(documentLog);
 
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
@@ -280,7 +302,7 @@ public class DocumentService : BaseService, IDocumentService
             return new NotFoundResult();
         }
 
-        var receive = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
+        var receive = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
             .FirstOrDefaultAsync();
 
         if (await IsReturnedDocument(document.Id))
@@ -381,10 +403,14 @@ public class DocumentService : BaseService, IDocumentService
         {
             return new NotFoundResult();
         }
+        var documentTypeCharacter = await _documentTypeRepository.Where(x => x.Id.Equals(model.DocumentTypeId))
+            .Select(x => x.Character).FirstOrDefaultAsync();
+        var documentCode = DocumentCodeHelper.UpdateCode(document.Code, documentTypeCharacter!);
 
         var classified = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
             .FirstOrDefaultAsync();
         document.StatusId = classified!.Id;
+        document.Code = documentCode;
         document.DocumentTypeId = model.DocumentTypeId;
         document.IsArchived = model.IsArchived;
         document.IsImportant = model.IsImportant;

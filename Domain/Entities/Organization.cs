@@ -11,5 +11,9 @@ public partial class Organization
 
     public DateTime CreatedAt { get; set; }
 
-    public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
+    public string Character { get; set; } = null!;
+
+    public virtual ICollection<Document> DocumentOrganizations { get; set; } = new List<Document>();
+
+    public virtual ICollection<Document> DocumentReceivingAgencies { get; set; } = new List<Document>();
 }

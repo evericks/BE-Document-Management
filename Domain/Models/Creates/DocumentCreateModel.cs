@@ -6,7 +6,9 @@ public class DocumentCreateModel
 {
     public Guid OrganizationId { get; set; }
     
-    public Guid ReceivingAgencyId { get; set; }
+    public Guid? ReceivingAgencyId { get; set; }
+    
+    public string? SendingMethod { get; set; }
 
     public string Name { get; set; } = null!;
 

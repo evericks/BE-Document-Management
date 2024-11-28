@@ -8,6 +8,8 @@ public class DocumentViewModel
 
     public string Name { get; set; } = null!;
 
+    public string? SendingMethod { get; set; }
+
     public bool IsImportant { get; set; }
 
     public string? Content { get; set; }

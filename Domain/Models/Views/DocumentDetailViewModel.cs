@@ -14,6 +14,8 @@ public class DocumentDetailViewModel
 
     public string? Content { get; set; }
 
+    public string? SendingMethod { get; set; }
+    
     public DateTime? DueDate { get; set; }
 
     public bool IsInternal { get; set; }

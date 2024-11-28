@@ -32,7 +32,10 @@ public partial class Document
     public DateTime CreatedAt { get; set; }
 
     public Guid OrganizationId { get; set; }
-    public Guid ReceivingAgencyId { get; set; }
+
+    public Guid? ReceivingAgencyId { get; set; }
+
+    public string? SendingMethod { get; set; }
 
     public virtual ICollection<AdditionalInformationDetail> AdditionalInformationDetails { get; set; } = new List<AdditionalInformationDetail>();
 
@@ -51,6 +54,8 @@ public partial class Document
     public virtual Organization Organization { get; set; } = null!;
 
     public virtual User Receiver { get; set; } = null!;
+
+    public virtual Organization? ReceivingAgency { get; set; }
 
     public virtual User Sender { get; set; } = null!;
 
