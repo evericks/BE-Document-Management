@@ -4,16 +4,15 @@ namespace Domain.Models.Creates;
 
 public class DocumentCreateModel
 {
-    public string Code { get; set; } = null!;
-
     public Guid OrganizationId { get; set; }
+    
+    public Guid ReceivingAgencyId { get; set; }
 
     public string Name { get; set; } = null!;
 
     public bool IsImportant { get; set; }
 
     public string? Content { get; set; }
-    public Guid? DocumentTypeId { get; set; }
 
     public Guid? StatusId { get; set; }
 

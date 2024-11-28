@@ -32,6 +32,7 @@ public partial class Document
     public DateTime CreatedAt { get; set; }
 
     public Guid OrganizationId { get; set; }
+    public Guid ReceivingAgencyId { get; set; }
 
     public virtual ICollection<AdditionalInformationDetail> AdditionalInformationDetails { get; set; } = new List<AdditionalInformationDetail>();
 

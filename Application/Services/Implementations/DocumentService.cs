@@ -3,6 +3,7 @@ using Application.Services.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using Common.Constants;
+using Common.Helpers;
 using Data.EntityRepositories.Interfaces;
 using Data.UnitOfWorks.Interfaces;
 using Domain.Entities;
@@ -149,6 +150,7 @@ public class DocumentService : BaseService, IDocumentService
     public async Task<IActionResult> CreateOutgoingDocument(Guid senderId, DocumentCreateModel model)
     {
         var document = _mapper.Map<Document>(model);
+        document.Code = DocumentCodeHelper.GenerateCode("VB", "TDDC");
         document.SenderId = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
             .FirstOrDefaultAsync();
@@ -192,10 +194,8 @@ public class DocumentService : BaseService, IDocumentService
         document.ReceiverId = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.Received))
             .FirstOrDefaultAsync();
-        var pending = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
-            .FirstOrDefaultAsync();
-        document.StatusId = model.DocumentTypeId == null ? status!.Id : pending!.Id;
-
+        document.StatusId = status!.Id;
+        
         if (model.Attachments != null)
         {
             foreach (var item in model.Attachments)
