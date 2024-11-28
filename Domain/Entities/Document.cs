@@ -33,6 +33,8 @@ public partial class Document
 
     public Guid OrganizationId { get; set; }
 
+    public virtual ICollection<AdditionalInformationDetail> AdditionalInformationDetails { get; set; } = new List<AdditionalInformationDetail>();
+
     public virtual ICollection<Archive> Archives { get; set; } = new List<Archive>();
 
     public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();

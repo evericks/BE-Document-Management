@@ -23,6 +23,6 @@ public interface IDocumentService
     Task<IActionResult> UpdateDocument(Guid id, DocumentUpdateModel model);
     Task<IActionResult> ReceiveDocument(Guid id);
     Task<IActionResult> ReturnDocument(Guid id, ReturnDocumentUpdateModel model);
-    Task<IActionResult> ClassifyDocument(Guid id, Guid documentTypeId);
+    Task<IActionResult> ClassifyDocument(Guid id, ClassifyCreateModel model);
     Task<IActionResult> DeleteDocument(Guid id);
 }

@@ -19,6 +19,7 @@ public class DocumentService : BaseService, IDocumentService
     private readonly IDocumentRepository _documentRepository;
     private readonly IDocumentStatusRepository _documentStatusRepository;
     private readonly IDocumentLogRepository _documentLogRepository;
+    private readonly IAdditionalInformationDetailRepository _additionalInformationDetailRepository;
     private readonly IEvercloudService _evercloudService;
 
     public DocumentService(IUnitOfWork unitOfWork, IMapper mapper, IEvercloudService evercloudService) : base(
@@ -27,6 +28,7 @@ public class DocumentService : BaseService, IDocumentService
         _documentRepository = unitOfWork.Document;
         _documentStatusRepository = unitOfWork.DocumentStatus;
         _documentLogRepository = unitOfWork.DocumentLog;
+        _additionalInformationDetailRepository = unitOfWork.AdditionalInformationDetail;
         _evercloudService = evercloudService;
     }
 
@@ -37,11 +39,11 @@ public class DocumentService : BaseService, IDocumentService
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
     }
-    
+
     public async Task<IActionResult> GetUserReferenceDocuments(Guid userId)
     {
         var documents = await _unitOfWork.Document.Where(x => x.ReceiverId.Equals(userId) || x.SenderId.Equals(userId)
-            || x.DocumentLogs.Any(y => y.UserId.Equals(userId)))
+                || x.DocumentLogs.Any(y => y.UserId.Equals(userId)))
             .OrderByDescending(x => x.CreatedAt)
             .ProjectTo<DocumentViewModel>(_mapper.ConfigurationProvider).ToListAsync();
         return new OkObjectResult(documents);
@@ -138,7 +140,7 @@ public class DocumentService : BaseService, IDocumentService
                 document.Attachments.Add(attachment);
             }
         }
-        
+
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -168,7 +170,7 @@ public class DocumentService : BaseService, IDocumentService
                 document.Attachments.Add(attachment);
             }
         }
-        
+
         var documentLog = new DocumentLog()
         {
             Id = Guid.NewGuid(),
@@ -220,7 +222,7 @@ public class DocumentService : BaseService, IDocumentService
             Action = DocumentLogs.CreateIncoming
         };
         _documentLogRepository.Add(documentLog);
-        
+
         _documentRepository.Add(document);
         var result = await _unitOfWork.SaveChangesAsync();
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
@@ -372,7 +374,7 @@ public class DocumentService : BaseService, IDocumentService
         return result > 0 ? await GetDocument(document.Id) : new BadRequestResult();
     }
 
-    public async Task<IActionResult> ClassifyDocument(Guid id, Guid documentTypeId)
+    public async Task<IActionResult> ClassifyDocument(Guid id, ClassifyCreateModel model)
     {
         var document = await _documentRepository.Where(x => x.Id.Equals(id)).FirstOrDefaultAsync();
         if (document == null)
@@ -383,7 +385,21 @@ public class DocumentService : BaseService, IDocumentService
         var classified = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingProcessing))
             .FirstOrDefaultAsync();
         document.StatusId = classified!.Id;
-        document.DocumentTypeId = documentTypeId;
+        document.DocumentTypeId = model.DocumentTypeId;
+        document.IsArchived = model.IsArchived;
+        document.IsImportant = model.IsImportant;
+        document.IsInternal = model.IsInternal;
+
+        var adis = model.AdditionalInformations
+            .Select(item => new AdditionalInformationDetail()
+            {
+                Id = Guid.NewGuid(), 
+                DocumentId = id,
+                AdditionalInformationId = item.Key, 
+                Value = item.Value
+            }).ToList();
+        
+        _additionalInformationDetailRepository.AddRange(adis);
         _documentRepository.Update(document);
         var documentLog = new DocumentLog()
         {

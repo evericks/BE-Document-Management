@@ -27,7 +27,7 @@ builder.Services.AddSwagger();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddDependencyInjection();
 builder.Services.AddRedis();
-builder.Services.AddHangfireServer();
+// builder.Services.AddHangfireServer();
 
 var app = builder.Build();
 
@@ -40,9 +40,9 @@ app.UseSwaggerUI();
 
 app.UseSerilogRequestLogging();
 
-app.UseHangfireDashboard();
+// app.UseHangfireDashboard();
 
-app.UseHangfire();
+// app.UseHangfire();
 
 app.UseHttpsRedirection();
 

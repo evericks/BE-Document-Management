@@ -86,6 +86,20 @@ public class UnitOfWork : IUnitOfWork
     {
         get { return _organization ??= new OrganizationRepository(_context); }
     }
+    
+    private IAdditionalInformationRepository? _additionalInformation;
+
+    public IAdditionalInformationRepository AdditionalInformation
+    {
+        get { return _additionalInformation ??= new AdditionalInformationRepository(_context); }
+    }
+    
+    private IAdditionalInformationDetailRepository? _additionalInformationDetail;
+
+    public IAdditionalInformationDetailRepository AdditionalInformationDetail
+    {
+        get { return _additionalInformationDetail ??= new AdditionalInformationDetailRepository(_context); }
+    }
 
     public void BeginTransaction()
     {

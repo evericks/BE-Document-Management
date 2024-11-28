@@ -193,10 +193,10 @@ public class DocumentController : Controller
     // PUT
     [HttpPut]
     [Authorize]
-    [Route("{id}/classify/{documentTypeId}")]
-    public async Task<IActionResult> ClassifyDocument([FromRoute] Guid id, [FromRoute] Guid documentTypeId)
+    [Route("{id}/classify")]
+    public async Task<IActionResult> ClassifyDocument([FromRoute] Guid id, [FromBody] ClassifyCreateModel model)
     {
-        return await _documentService.ClassifyDocument(id, documentTypeId);
+        return await _documentService.ClassifyDocument(id, model);
     }
 
     // DELETE

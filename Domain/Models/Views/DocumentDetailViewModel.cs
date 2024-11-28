@@ -22,6 +22,8 @@ public class DocumentDetailViewModel
 
     public DateTime CreatedAt { get; set; }
 
+    public ICollection<AdditionalInformationDetailViewModel> AdditionalInformationDetails { get; set; } = new List<AdditionalInformationDetailViewModel>();
+    
     public ICollection<AttachmentViewModel> Attachments { get; set; } = new List<AttachmentViewModel>();
 
     public ICollection<DocumentProcessDetailViewModel> DocumentProcesses { get; set; } = new List<DocumentProcessDetailViewModel>();

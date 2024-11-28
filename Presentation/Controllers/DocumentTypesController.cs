@@ -31,6 +31,13 @@ public class DocumentTypeController : Controller
         return await _documentTypeService.GetDocumentType(id);
     }
     
+    [HttpGet]
+    [Route("additional-informations/{id}")]
+    public async Task<IActionResult> GetAdditionalInformationByDocumentTypeId([FromRoute] Guid id)
+    {
+        return await _documentTypeService.GetAdditionalInformationByDocumentTypeId(id);
+    }
+    
     // POST
     [HttpPost]
     public async Task<IActionResult> CreateDocumentType([FromBody] DocumentTypeCreateModel model)
