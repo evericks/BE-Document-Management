@@ -161,6 +161,7 @@ public class DocumentService : BaseService, IDocumentService
         var agencyCharacter = await _organizationRepository.Where(x => x.Id.Equals(model.OrganizationId))
             .Select(x => x.Character).FirstOrDefaultAsync();
         document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
+        document.CreatedById = senderId;
         document.SenderId = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
             .FirstOrDefaultAsync();
@@ -204,6 +205,7 @@ public class DocumentService : BaseService, IDocumentService
         document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
         document.SenderId = senderId;
         document.ReceiverId = (Guid)model.ReceiverId!;
+        document.CreatedById = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.PendingApproval))
             .FirstOrDefaultAsync();
         document.StatusId = status!.Id;
@@ -245,6 +247,7 @@ public class DocumentService : BaseService, IDocumentService
             .Select(x => x.Character).FirstOrDefaultAsync();
         document.Code = DocumentCodeHelper.GenerateCode("UNCLASSIFY", agencyCharacter!);
         document.SenderId = senderId;
+        document.CreatedById = senderId;
         var status = await _documentStatusRepository.Where(x => x.Name.Equals(DocumentStatuses.InDrafting))
             .FirstOrDefaultAsync();
         document.StatusId = status!.Id;

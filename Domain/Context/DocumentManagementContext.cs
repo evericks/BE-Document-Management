@@ -221,6 +221,11 @@ public partial class DocumentManagementContext : DbContext
             entity.Property(e => e.DueDate).HasColumnType("datetime");
             entity.Property(e => e.SendingMethod).HasMaxLength(256);
 
+            entity.HasOne(d => d.CreatedBy).WithMany(p => p.DocumentCreatedBies)
+                .HasForeignKey(d => d.CreatedById)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__Document__Create__56E8E7AB");
+
             entity.HasOne(d => d.DocumentType).WithMany(p => p.Documents)
                 .HasForeignKey(d => d.DocumentTypeId)
                 .HasConstraintName("FK__Document__Docume__5CD6CB2B");

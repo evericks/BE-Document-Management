@@ -37,11 +37,15 @@ public partial class Document
 
     public string? SendingMethod { get; set; }
 
+    public Guid CreatedById { get; set; }
+
     public virtual ICollection<AdditionalInformationDetail> AdditionalInformationDetails { get; set; } = new List<AdditionalInformationDetail>();
 
     public virtual ICollection<Archive> Archives { get; set; } = new List<Archive>();
 
     public virtual ICollection<Attachment> Attachments { get; set; } = new List<Attachment>();
+
+    public virtual User CreatedBy { get; set; } = null!;
 
     public virtual ICollection<DocumentDistribution> DocumentDistributions { get; set; } = new List<DocumentDistribution>();
 

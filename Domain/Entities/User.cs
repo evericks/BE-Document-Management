@@ -33,6 +33,8 @@ public partial class User
 
     public virtual Department Department { get; set; } = null!;
 
+    public virtual ICollection<Document> DocumentCreatedBies { get; set; } = new List<Document>();
+
     public virtual ICollection<DocumentDistribution> DocumentDistributions { get; set; } = new List<DocumentDistribution>();
 
     public virtual ICollection<DocumentLog> DocumentLogs { get; set; } = new List<DocumentLog>();
